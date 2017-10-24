@@ -2,6 +2,10 @@ from pycparser import c_ast
 import minic_ast as mc
 
 
+# Assignments are all converted into assignments using the '=' operator.
+# All assignments using other operators are converted into assignments
+# using the '=' and the expression on the right hand side is a binary
+# expression such that the assignment has the same semantics.
 def of_assignment(orig):
     lvalue = t(orig.lvalue)
     if orig.rvalue is not None:
@@ -28,6 +32,8 @@ def of_assignment(orig):
     return mc.Assignment(lvalue, final_rvalue, coord=orig.coord)
 
 
+# PyCParser represents increment and decrement as unary operations, we convert them
+# to assignments. Other unary operators are kept as is.
 def maybe_special_unary(orig):
     return {
         'p--': (lambda x: mc.Assignment(x, mc.BinaryOp('-', x, mc.Constant('int', '1')))),
@@ -37,6 +43,8 @@ def maybe_special_unary(orig):
     }.get(orig.op, lambda x: mc.UnaryOp(orig.op, x))(t(orig.expr))
 
 
+# If there is no match case in the dictionary style switch, then it means it is a construct
+# that is not supported in minic.
 def nomatch(y):
     if y is None:
         return None
@@ -46,6 +54,8 @@ def nomatch(y):
         raise TypeError
 
 
+# Checks that the original construct is a value, a not any another construct. It helps
+# in checking that we have terminal symbols at the right places.
 def v(orig):
     if isinstance(orig, str) or isinstance(orig, int) or isinstance(orig, float) \
             or isinstance(orig, bool) or orig is None:
@@ -62,6 +72,8 @@ def tmap(x):
         t(x)
 
 
+# The main transformer function. This is close to a mapping for PyCparser AST nodes to Minic nodes, except
+# that there are less constructs and we have to transform assignments and unary operators.
 def t(x):
     return {
         c_ast.ArrayDecl: (lambda orig: mc.ArrayDecl(t(orig.type), orig.dim, coord=orig.coord)),

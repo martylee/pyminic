@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest
 from pycparser import parse_file
 import minic.c_ast_to_minic as ctoc
@@ -7,7 +8,7 @@ import minic.minic_ast as mast
 class TestConversion1(unittest.TestCase):
     def test_parse_and_convert(self):
         fullc_ast = parse_file('./c_files/minic.c')
-        converted = ctoc.t(fullc_ast)
+        converted = ctoc.transform(fullc_ast)
         self.failUnless(isinstance(converted, mast.FileAST))
         self.assertEqual(len(converted.ext), 2)
         self.failUnless(isinstance(converted.ext[0], mast.FuncDef))
@@ -22,7 +23,7 @@ class TestConversion1(unittest.TestCase):
         self.failUnless(isinstance(mss_body.block_items[2], mast.Decl))
         self.failUnless(isinstance(mss_body.block_items[3], mast.For))
         forstmt = mss_body.block_items[3]
-        print forstmt.next
+        print(forstmt.next)
         self.assertTrue(isinstance(forstmt.next, mast.Assignment))
         self.failUnless(isinstance(mss_body.block_items[4], mast.Return))
 

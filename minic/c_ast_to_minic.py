@@ -45,17 +45,6 @@ def maybe_special_unary(orig):
     }.get(orig.op, lambda x: mc.UnaryOp(orig.op, x))(transform(orig.expr))
 
 
-# If there is no match case in the dictionary style switch, then it means it is a construct
-# that is not supported in minic.
-def nomatch(y):
-    if y is None:
-        return None
-    else:
-        print("No match found for class %r" % y.__class__)
-        y.show()
-        raise TypeError
-
-
 # Checks that the original construct is a value, a not any another construct. It helps
 # in checking that we have terminal symbols at the right places.
 def v(orig):
@@ -72,6 +61,20 @@ def tmap(x):
         return lmap(transform, x)
     else:
         return transform(x)
+
+
+class ErrorUnsupportedConstruct(TypeError):
+    def __init__(self, construct):
+        self.messsage = "Unsupported construct %s" % construct
+
+
+# If there is no match case in the dictionary style switch, then it means it is a construct
+# that is not supported in minic.
+def unsupported(y):
+    if y is None:
+        return None
+    else:
+        raise ErrorUnsupportedConstruct(y)
 
 
 # The main transformer function. This is close to a mapping for PyCparser AST nodes to Minic nodes, except
@@ -110,5 +113,5 @@ def transform(x):
         str: (lambda orig: orig),
         int: (lambda orig: orig),
         float: (lambda orig: orig),
-        list: (lambda orig: tmap(orig))
-    }.get(x.__class__, lambda y: nomatch(y))(x)
+        list: (lambda orig: tmap(orig)),
+    }.get(x.__class__, lambda y: unsupported(y))(x)

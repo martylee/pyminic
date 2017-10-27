@@ -132,7 +132,7 @@ class ArrayDecl(Node):
         if self.dim is not None: nodelist.append(("dim", self.dim))
         return tuple(nodelist)
 
-    attr_names = ('dim_quals', )
+    attr_names = ()
 
 
 class ArrayRef(Node):

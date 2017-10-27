@@ -1,5 +1,5 @@
 from __future__ import print_function
-from pycparser import c_ast
+from pycparser import c_ast, parse_file
 import minic.minic_ast as mc
 from minic.mutils import lmap
 
@@ -115,3 +115,7 @@ def transform(x):
         float: (lambda orig: orig),
         list: (lambda orig: tmap(orig)),
     }.get(x.__class__, lambda y: unsupported(y))(x)
+
+
+def minic_parse_file(filename):
+    return transform(parse_file(filename))

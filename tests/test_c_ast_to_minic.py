@@ -6,7 +6,7 @@ import minic.minic_ast as mast
 
 
 class TestConversion1(unittest.TestCase):
-    def test_parse_and_convert(self):
+    def test_parse_and_convert1(self):
         fullc_ast = parse_file('./c_files/minic.c')
         converted = ctoc.transform(fullc_ast)
         self.failUnless(isinstance(converted, mast.FileAST))
@@ -35,3 +35,7 @@ class TestConversion1(unittest.TestCase):
         self.failUnless(isinstance(main_body.block_items[1], mast.Decl))
         self.failUnless(isinstance(main_body.block_items[2], mast.Assignment))
         self.failUnless(isinstance(main_body.block_items[3], mast.Return))
+
+    def test_parse_and_convert2(self):
+        converted = ctoc.transform(parse_file('./c_files/test2.c'))
+        self.failUnless(isinstance(converted, mast.FileAST))

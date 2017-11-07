@@ -167,6 +167,8 @@ class Assignment(Node):
         if self.lvalue is not None: nodelist.append(("lvalue", self.lvalue))
         if self.rvalue is not None: nodelist.append(("rvalue", self.rvalue))
         return tuple(nodelist)
+    
+    attr_names = ()
 
     def __str__(self):
         return "%s = %s" % (self.lvalue, self.rvalue)

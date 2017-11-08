@@ -6,18 +6,7 @@ import copy
 
 # Dataflow analyses on ASTs
 
-sid = 0
 
-
-def get_sid():
-    global sid
-    sid += 1
-    return sid
-
-
-def set_sid(i):
-    global sid
-    sid = i
 
 
 # Function to get variable name from lvalue in Assignment
@@ -120,7 +109,7 @@ class ReachingDefinitions(mast.NodeVisitor, DFAnalysis):
     # When visiting an assignment, update the reaching definitions.
     def visit_Assignment(self, assignment):
         # Get a new statement id
-        msid = get_sid()
+        msid = assignment.nid
         # Store the sid -> statement information.
         self.stmts[msid] = assignment
         # Store the reaching definitions
@@ -132,8 +121,7 @@ class ReachingDefinitions(mast.NodeVisitor, DFAnalysis):
 
     #Same when visiting a declaration
     def visit_Decl(self, decl):
-        assert isinstance(decl, mast.Decl)
-        msid = get_sid()
+        msid = decl.nid
         # Store the sid -> statement information.
         self.stmts[msid] = decl
         # Store the reaching definitions
@@ -145,9 +133,7 @@ class ReachingDefinitions(mast.NodeVisitor, DFAnalysis):
 
     #Visiting a conditional causes branching, and joining with non-destructive update
     def visit_If(self, ifstmt):
-        assert isinstance(ifstmt, mast.If)
-        # Store the if statement
-        ifsid = get_sid()
+        ifsid = ifstmt.nid
         self.stmts[ifsid] = ifstmt
         self.__store_self_defs_(ifsid)
         #Visit the two branches, starting with the current state
@@ -171,20 +157,19 @@ class ReachingDefinitions(mast.NodeVisitor, DFAnalysis):
 
     # Visiting a for loop ...
     def visit_For(self, forstmt):
-        assert isinstance(forstmt, mast.For)
-        forsid = get_sid()
+        forsid = forstmt.nid
         # Don't forget to store the statement id, this is a loop
         self.loops.append(forsid)
         self.stmts[forsid] = forstmt
         # Store the current state of reaching definitions
         self.__store_self_defs_(forsid)
         # Store the special 'init' statemetn in the for declaration
-        initsid = get_sid()
+        initsid = forstmt.init.nid
         self.stmts[initsid] = forstmt.init
         self.__store_self_defs_(initsid)
         self.current_rdefs = update_rdefs(initsid, forstmt.init, self.current_rdefs)
         # Store the special 'next' statement in the for declaration
-        updatesid = get_sid()
+        updatesid = forstmt.next.nid
         self.stmts[updatesid] = forstmt.next
         self.__store_self_defs_(updatesid)
         # Update the reaching defs state
@@ -196,8 +181,7 @@ class ReachingDefinitions(mast.NodeVisitor, DFAnalysis):
         self.update_from_children_visit(bodyvisitor)
 
     def visit_While(self, whilestmt):
-        assert isinstance(whilestmt, mast.While)
-        wsid = get_sid()
+        wsid = whilestmt.nid
         self.loops.append(wsid)
         self.stmts[wsid] = whilestmt
         self.__store_self_defs_(wsid)
@@ -208,8 +192,7 @@ class ReachingDefinitions(mast.NodeVisitor, DFAnalysis):
         self.update_from_children_visit(bodyvisitor)
 
     def visit_DoWhile(self, dowhilestmt):
-        assert isinstance(dowhilestmt, mast.While)
-        dowsid = get_sid()
+        dowsid = dowhilestmt.nid
         self.loops.append(dowsid)
         self.stmts[dowsid] = dowhilestmt
         self.__store_self_defs_(dowsid)
@@ -220,8 +203,7 @@ class ReachingDefinitions(mast.NodeVisitor, DFAnalysis):
         self.update_from_children_visit(bodyvisitor)
 
     def visit_Block(self, block):
-        assert isinstance(block, mast.Block)
-        blockid = get_sid()
+        blockid = block.nid
         self.stmts[blockid] = block
         self.__store_self_defs_(blockid)
         for stmt in block.block_items:
@@ -297,8 +279,7 @@ class LiveVariables(mast.NodeVisitor, DFAnalysis):
 
     # When visiting an assignment, update the reaching definitions.
     def visit_Assignment(self, assignment):
-        # Get a new statement id
-        msid = get_sid()
+        msid = assignment.nid
         # Store the sid -> statement information.
         self.stmts[msid] = assignment
         # Store the reaching definitions
@@ -308,9 +289,7 @@ class LiveVariables(mast.NodeVisitor, DFAnalysis):
         self.visit(assignment.lvalue)
 
     def visit_If(self, ifstmt):
-        assert isinstance(ifstmt, mast.If)
-        # Store the if statement
-        ifsid = get_sid()
+        ifsid = ifstmt.nid
         self.stmts[ifsid] = ifstmt
         # Trick here: use a copy of self to go though one branch,
         # and self to the other, so the live variables seen in the branches
@@ -326,7 +305,7 @@ class LiveVariables(mast.NodeVisitor, DFAnalysis):
 
     # Visiting a for loop ...
     def visit_For(self, forstmt):
-        forsid = get_sid()
+        forsid = forstmt.nid
         self.loops.append(forsid)
         self.stmts[forsid] = forstmt
         self.visit(forstmt.stmt)
@@ -335,8 +314,7 @@ class LiveVariables(mast.NodeVisitor, DFAnalysis):
         self.freeze(forsid)
 
     def visit_While(self, whilestmt):
-        assert isinstance(whilestmt, mast.While)
-        wsid = get_sid()
+        wsid = whilestmt.nid
         self.loops.append(wsid)
         self.stmts[wsid] = whilestmt
         self.visit(whilestmt.stmt)
@@ -344,8 +322,7 @@ class LiveVariables(mast.NodeVisitor, DFAnalysis):
         self.freeze(wsid)
 
     def visit_DoWhile(self, dowhilestmt):
-        assert isinstance(dowhilestmt, mast.While)
-        dowsid = get_sid()
+        dowsid = dowhilestmt.nid
         self.loops.append(dowsid)
         self.stmts[dowsid] = dowhilestmt
         self.visit(dowhilestmt.stmt)
@@ -354,8 +331,7 @@ class LiveVariables(mast.NodeVisitor, DFAnalysis):
 
 
     def visit_Block(self, block):
-        assert isinstance(block, mast.Block)
-        blockid = get_sid()
+        blockid = block.nid
         self.stmts[blockid] = block
         for stmt in reversed(block.block_items):
             self.visit(stmt)

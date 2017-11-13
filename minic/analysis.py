@@ -363,12 +363,11 @@ class LiveVariables(mast.NodeVisitor, DFAnalysis):
 
 # Store all function bodies
 class FuncBodiesAnalysis(mast.NodeVisitor):
-    function_bodies = {}
-    function_analysis_results = {}
-
     # Instantiate with name of an analysis that must be a superclass of DFAnalysis
     def __init__(self, analysis):
         self.analysis = analysis
+        self.function_bodies = {}
+        self.function_analysis_results = {}
 
     def visit_FuncDef(self, funcdef):
         self.function_bodies[str(funcdef.decl.name)] = funcdef.body

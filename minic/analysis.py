@@ -92,7 +92,7 @@ class ReachingDefinitions(mast.NodeVisitor, DFAnalysis):
         self.stmt_rdefs[sid] = copy.deepcopy(self.current_rdefs)
 
     def show_rdefs(self, sid):
-        for rd_sid in list(self.stmt_rdefs[sid]):
+        for rd_sid in list(self.stmt_rdefs[sid].rdefs):
             self.stmts[rd_sid].show()
 
     # What you do when you visited a children with another visitor

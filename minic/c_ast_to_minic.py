@@ -1,7 +1,7 @@
 from __future__ import print_function
 from pycparser import c_ast, parse_file
-import minic.minic_ast as mc
-from minic.mutils import lmap
+import minic_ast as mc
+from mutils import lmap
 
 
 # In the transformation process, all the nodes will receive an id for

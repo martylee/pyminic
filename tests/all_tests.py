@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import unittest
 import sys
-sys.path.append('../minic')
+sys.path.append('..')
 
 suite = unittest.TestLoader().loadTestsFromNames(
     [

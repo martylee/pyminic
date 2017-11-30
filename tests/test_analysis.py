@@ -1,5 +1,6 @@
 from __future__ import print_function
-
+import sys
+sys.path.append("../minic")
 import minic.analysis as mana
 import unittest
 import minic.c_ast_to_minic as ctoc
